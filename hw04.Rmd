@@ -1,0 +1,247 @@
+---
+title: "Homework 4" 
+author: "Albina Gibadullina" 
+date: "October 9" 
+output:
+  github_document:
+    toc: yes 
+---
+
+## Introduction
+
+In this project, I will be modifying `gapminder` dataset as well as merging `gapminder` dataset with other datasets. Specifically, I will show you how to do: 
+
+1. **Data Reshaping Prompt 2** - Make a tibble with one row per year and columns for life expectancy for two or more countries. 
+2. **Join Prompt 1** - Create a second data frame, complementary to Gapminder, join this with Gapminder using a dplyr join function and make some observations about the process and result. 
+
+## Setting up access to the dataset, downloading needed packages
+
+First, load the `gapminder` R package. Also load tidyverse package - this will also load ggplot2 and dplyr.
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(gapminder))
+```
+
+## Data Reshaping Activity #2
+
+The goal is to create a new dataframe with one row per year and columns for life expectancy for two or more countries. I selected Canada, France and Germany as my countries.
+
+I will show you how to do this in two ways. First method is done by extracting country's life expectancy data into a new dataframe and combining these dataframes together for multiple countries. Second method is done by using the `spread()` function.
+
+### Method 1
+
+#### Extract annual `lifeExp` data for Canada from `gapminder`
+
+First, let's extract Canadian life-expectancy data into a new data frame.
+```{r}
+LifeExpCanada=gapminder %>% 
+  filter(country=="Canada") %>% 
+  select(year, lifeExp) # keep only year and life expectancy columns
+colnames(LifeExpCanada) <- c("Year", "Canada") # rename columns
+knitr::kable(LifeExpCanada, format = "markdown")
+```
+
+#### Extract annual `lifeExp` data for France from `gapminder`
+
+Next, let's extract French life-expectancy data into a new data frame.
+```{r}
+LifeExpFrance=gapminder %>% 
+  filter(country=="France") %>% 
+  select(year, lifeExp) # keep only year and life expectancy columns
+colnames(LifeExpFrance) <- c("Year", "France") # rename columns
+knitr::kable(LifeExpFrance, format = "markdown")
+```
+
+#### Extract annual `lifeExp` data for Germany from `gapminder`
+
+Finally, let's repeat the process for Germany.
+```{r}
+LifeExpGermany=gapminder %>% 
+  filter(country=="Germany") %>% 
+  select(year, lifeExp) # keep only year and life expectancy columns
+colnames(LifeExpGermany) <- c("Year", "Germany") # rename columns
+knitr::kable(LifeExpGermany, format = "markdown")
+```
+
+#### Combine data frames for three countries into one
+
+We have three separate dataframes for each country. We can use the `left_join` function to merge the dataframes together. We will have to do it in two steps since we can merge only two dataframes at any single time.
+```{r}
+LifeExpCanFran=left_join(LifeExpCanada,LifeExpFrance, by="Year")
+LifeExpCountry=left_join(LifeExpCanFran,LifeExpGermany,by="Year")
+knitr::kable(LifeExpCountry, format = "markdown")
+```
+
+### Method 2 using the `spread()` function
+
+The previous version took some time. There is an alternative way to get to the same results much faster by using the `spread()` function.
+
+<a href="http://garrettgman.github.io/tidying/">**Garrett Grolemund's website**</a> provides a great explanation of how the `spread()` function works:
+
+> `spread()` returns a copy of your data set that has had the key and value columns removed. In their place, `spread()` adds a new column for each unique value of the key column. These unique values will form the column names of the new columns. `spread()` distributes the cells of the former value column across the cells of the new columns and truncates any non-key, non-value columns in a way that prevents duplication."
+
+In our case, key is `country` and value is `lifeExp` as we moving country values from unique row values to new columns. We will filter for the selected countries as before.
+```{r}
+LifeExpCount=gapminder %>% 
+ filter(country == "Canada" | country=="France" | country == "Germany" ) %>%  select(c("year", "country", lifeExp)) %>% # we want to only have year, country and lifeExp variables in our new dataframe
+ spread(key="country", value = "lifeExp") # using spread function to move country variables into new columns
+ knitr::kable(LifeExpCount, format = "markdown")
+```
+
+As we can see, the outcome from Method 1 is equivalent to outcome from Method 2. The difference is that the `spread()` function allows us to do it 3-4x faster.
+
+### Scatterplots
+
+#### Make a scatterplot of `lifeExp` by `country`
+
+We can make a scatterplot of life expectancy for each country by year.
+```{r}
+LifeExpCount %>% 
+  ggplot(aes(year)) + 
+  geom_line(aes(y = Canada, color = "Canada")) + ## add Canadian Life Exp line
+  geom_point(aes(y = Canada, color = "Canada")) + ## add Canadian Life Exp points
+  geom_line(aes(y = France, color = "France")) + ## add French Life Exp line
+  geom_point(aes(y = France, color = "France")) + ## add French Life Exp points
+  geom_line(aes(y = Germany, color = "Germany")) + ## add German Life Exp line
+  geom_point(aes(y = Germany, color = "Germany")) + ## add German Life Exp points
+  ylab("Life Expectancy") + ## change y-axis label
+  labs(title="Life Expectancy by Year for Canada, France and Germany") + 
+  theme_classic()
+```
+
+#### Make a scatterplot of French and German `lifeExp` by Canadian `lifeExp`
+
+We can also create a life expectancy scatterplot for one country against another by putting life expectancy of one of the countries on the x-axis. In this case, let's put Canadian life expectancy on the x-axis and plot French and German life expectancies against it.
+
+```{r}
+LifeExpCountry %>% 
+  ggplot(aes(Canada)) + 
+  geom_line(aes(y = France, color="France")) + ## add French Life Exp line
+  geom_point(aes(y = France, color="France")) + ## add French Life Exp points
+  geom_line(aes(y = Germany, color = "Germany")) + ## add German Life Exp line
+  geom_point(aes(y = Germany, color = "Germany")) + ## add German Life Exp points
+  ylab("Life Expectancy") + ## change y-axis label
+  xlab("Canadian Life Expectancy") + ## change y-axis label
+  labs(title="Canadian vs. French and German Life Expectancy") + 
+  theme_classic()
+```
+
+We can notice how German life expectancy is falling behind French one.
+
+## Join Activity #1
+
+Create a second data frame, complementary to Gapminder. Join it with Gapminder using a dplyr join function and make some observations about the process and result. 
+
+I have decided to use the <a href="https://www.ip2location.com/free/country-information">**following dataset from IP2location.com**</a> that provides capital, currency, and language information for each country among some other variables.
+
+First, let's read the excel file:
+```{r}
+IP2data <- read_csv("data file/IP2LOCATION-COUNTRY-INFORMATION.CSV")
+```
+
+
+Use the `glimpse()` function to see characteristics of this data frame
+```{r}
+glimpse(IP2data)
+```
+
+We have 13 distinct variables with 249 observations. Data is cross-sectional, i.e. it was collected at one point in time.
+
+Let's extract four variables from `IP2data` file (`country_name`, `capital` `currency_name` and `lang_name`) and rename some of them.
+
+```{r}
+CountryInformation <- select(IP2data, country=country_name, capital, currency=currency_name, language=lang_name)
+
+glimpse(CountryInformation)
+```
+
+Now, we only have 4 variables left.
+
+Let's check how many countries `gapminder` and `CountryInformation` have in common. Before we do that, we need to transform gapminder dataset from panel data (both cross-sectional and time-series) to cross-sectional data. One of the ways to do this would be to just focus on one of the years, for instance 2002.
+
+```{r}
+gapminder2002 <- gapminder %>% 
+  filter(year==2002)
+```
+
+Let's double check data frame parameters of `gapminder2002`
+```{r}
+glimpse(gapminder2002)
+```
+
+Here, we have 6 distinct variables with 142 observations. The number of countries in `gapminder2002` is 142 which is less than the number of countries in `CountryInformation` - 249. 
+
+Now, let's calculate how many of the `gapminder2002` countries are included in the `CountryInformation` dataframe
+```{r}
+sum(gapminder2002$country %in% CountryInformation$country)
+```
+
+The number is 126, meaning that not all of the 142 `gapminder2002` countries appear in the`CountryInformation` dataframe. 
+
+### Inner_join
+
+To avoid missing data for countries, we will use the `inner_join()` function which joins dataframes by ensuring that for a chosen variable (e.g. country), observations are present for each variable, so we should end up with only 126 observations in our new data frame.
+
+```{r}
+Innerjoin <- inner_join(gapminder2002, CountryInformation, by="country")
+```
+
+Let's check the data frame dimensions
+```{r}
+dim(Innerjoin)
+```
+
+As we expected, we now have 9 variables (1+5+3) with 126 observations for the countries that these dataframes have in common.
+
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+```{r}
+knitr::kable(filter(Innerjoin, continent=="Asia"), format = "markdown")
+```
+
+### Full_join
+
+We can also try the `full_join()` function which will retain rows for all the countries listed in both data frames. We should still  have 9 variables but 265 observations = 249 (# in CountryInformation) + 142 (# in gapminder2002) - 126 (joint # in both)
+
+```{r}
+Fulljoin <- full_join(gapminder2002, CountryInformation, by="country")
+```
+
+Let's check the dimensions of the dataframe
+```{r}
+dim(Fulljoin)
+```
+
+As expected, we have 9 variables and 265 observations, meaning that some countries are probably listed twice and others have missing data.
+
+### Left_join
+
+We can also try the `left_join()` function by adding data from `CountryInformation` to `gapminder2002`. We should retain the number of observations present in `gapminder2002` = 142, but still have 9 variables
+
+```{r}
+Leftjoin <- left_join(gapminder2002, CountryInformation, by="country")
+```
+
+Let's check the dimensions of the dataframe
+```{r}
+dim(Leftjoin)
+```
+
+As expected, we have 9 variables and 142 observations.
+
+### Right_join
+
+We can also try the `right_join()` function by adding data from `gapminder2002` to `CountryInformation`. We should retain the number of observations present in `CountryInformation` = 249, but still have 9 variables
+
+```{r}
+Rightjoin <- right_join(gapminder2002, CountryInformation, by="country")
+```
+
+Let's check the dimensions of the dataframe
+```{r}
+dim(Rightjoin)
+```
+
+As expected, we have 9 variables and 249 observations.
+
+Depending on which dataframe you'd want to prioritize in your final dataset, you can use four different functions.
