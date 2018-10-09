@@ -196,8 +196,11 @@ As we expected, we now have 9 variables (1+5+3) with 126 observations for the co
 
 Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
 ```{r}
+dim(filter(Innerjoin, continent=="Asia"))
 knitr::kable(filter(Innerjoin, continent=="Asia"), format = "markdown")
 ```
+
+Notice that there are only 24 Asian countries in common.
 
 ### Full_join
 
@@ -214,6 +217,15 @@ dim(Fulljoin)
 
 As expected, we have 9 variables and 265 observations, meaning that some countries are probably listed twice and others have missing data.
 
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+```{r}
+dim(filter(Fulljoin, continent=="Asia"))
+knitr::kable(filter(Fulljoin, continent=="Asia"), format = "markdown")
+```
+
+Notice that the full list consists of 33 Asian countries.
+
+
 ### Left_join
 
 We can also try the `left_join()` function by adding data from `CountryInformation` to `gapminder2002`. We should retain the number of observations present in `gapminder2002` = 142, but still have 9 variables
@@ -229,6 +241,16 @@ dim(Leftjoin)
 
 As expected, we have 9 variables and 142 observations.
 
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+```{r}
+dim(filter(Leftjoin, continent=="Asia"))
+knitr::kable(filter(Leftjoin, continent=="Asia"), format = "markdown")
+```
+
+As with the fulljoin option, we have a list of 33 Asian countries, meaning that there are 33 Asian countries in the `CountryInformation` dataset that are present in the `gapminder2002` dataset. By comparing this number to the number the fulljoin option, we can derive that `CountryInformation` includes the complete list of Asian countries.
+
+
+
 ### Right_join
 
 We can also try the `right_join()` function by adding data from `gapminder2002` to `CountryInformation`. We should retain the number of observations present in `CountryInformation` = 249, but still have 9 variables
@@ -243,5 +265,14 @@ dim(Rightjoin)
 ```
 
 As expected, we have 9 variables and 249 observations.
+
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+```{r}
+dim(filter(Rightjoin, continent=="Asia"))
+knitr::kable(filter(Rightjoin, continent=="Asia"), format = "markdown")
+```
+
+Here, we have 24 countries, meaning that there are only 24 Asian countries in the `gapminder2002` dataset that are present in the `CountryInformation` dataset.
+
 
 Depending on which dataframe you'd want to prioritize in your final dataset, you can use four different functions.
