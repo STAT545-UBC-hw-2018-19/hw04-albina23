@@ -194,13 +194,13 @@ dim(Innerjoin)
 
 As we expected, we now have 9 variables (1+5+3) with 126 observations for the countries that these dataframes have in common.
 
-Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia with `gdpPercap` less than 2400)
 ```{r}
-dim(filter(Innerjoin, continent=="Asia"))
-knitr::kable(filter(Innerjoin, continent=="Asia"), format = "markdown")
+dim(filter(Innerjoin, continent=="Asia", gdpPercap<2400))
+knitr::kable(filter(Innerjoin, continent=="Asia", gdpPercap<2400), format = "markdown")
 ```
 
-Notice that there are only 24 Asian countries in common.
+Notice that there are only 8 Asian countries in common in these two datasets that satify the `gdpPercap` requirement. Also note no missing data.
 
 ### Full_join
 
@@ -217,13 +217,13 @@ dim(Fulljoin)
 
 As expected, we have 9 variables and 265 observations, meaning that some countries are probably listed twice and others have missing data.
 
-Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia with `gdpPercap` less than 2400)
 ```{r}
-dim(filter(Fulljoin, continent=="Asia"))
-knitr::kable(filter(Fulljoin, continent=="Asia"), format = "markdown")
+dim(filter(Fulljoin, continent=="Asia", gdpPercap<2400))
+knitr::kable(filter(Fulljoin, continent=="Asia", gdpPercap<2400), format = "markdown")
 ```
 
-Notice that the full list consists of 33 Asian countries.
+Notice that the full list consists of 11 Asian countries: DRC, Vietnam and Yemen are present in one of the data-frames but not both - you can notice that some data is missing for these countries (specifically `capital`, `currency` and `language`).
 
 
 ### Left_join
@@ -241,14 +241,13 @@ dim(Leftjoin)
 
 As expected, we have 9 variables and 142 observations.
 
-Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia with `gdpPercap` less than 2400)
 ```{r}
-dim(filter(Leftjoin, continent=="Asia"))
-knitr::kable(filter(Leftjoin, continent=="Asia"), format = "markdown")
+dim(filter(Leftjoin, continent=="Asia", gdpPercap<2400))
+knitr::kable(filter(Leftjoin, continent=="Asia", gdpPercap<2400), format = "markdown")
 ```
 
-As with the fulljoin option, we have a list of 33 Asian countries, meaning that there are 33 Asian countries in the `CountryInformation` dataset that are present in the `gapminder2002` dataset. By comparing this number to the number the fulljoin option, we can derive that `CountryInformation` includes the complete list of Asian countries.
-
+As with the fulljoin option, we have a list of 11 Asian countries, meaning that there are 11 Asian countries with `gdpPercap` below 2400 in the `CountryInformation` dataset that are present in the `gapminder2002` dataset. By comparing this number to the number the fulljoin option, we can derive that `gapminder2002` includes the complete list of Asian countries that satisfy the `gdpPercap` requirement.
 
 
 ### Right_join
@@ -266,13 +265,13 @@ dim(Rightjoin)
 
 As expected, we have 9 variables and 249 observations.
 
-Let's see how a part of this dataset looks like (we will only focus on countries in Asia)
+Let's see how a part of this dataset looks like (we will only focus on countries in Asia with `gdpPercap` less than 2400)
 ```{r}
-dim(filter(Rightjoin, continent=="Asia"))
-knitr::kable(filter(Rightjoin, continent=="Asia"), format = "markdown")
+dim(filter(Rightjoin, continent=="Asia", gdpPercap<2400))
+knitr::kable(filter(Rightjoin, continent=="Asia", gdpPercap<2400), format = "markdown")
 ```
 
-Here, we have 24 countries, meaning that there are only 24 Asian countries in the `gapminder2002` dataset that are present in the `CountryInformation` dataset.
+Here, we have 8 countries, meaning that there are only 8 Asian countries with `gdpPercap` less than 2400 in the `gapminder2002` dataset that are present in the `CountryInformation` dataset.
 
 
-Depending on which dataframe you'd want to prioritize in your final dataset, you can use four different functions.
+Overall, we can conclude that the `gapminder2002` has better data coverage for Asian countriees with `gdpPercap` less than 2400 than the `CountryInformation` dataset despite the fact there are significantly more countries in the latter.
